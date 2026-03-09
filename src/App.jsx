@@ -272,12 +272,9 @@ export default function BrandForge() {
     showToast("Generando nueva variante...");
     const ctx = cat.questions.map(q=>`- ${q.label}: ${answers[q.id]}`).join("\n");
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST", headers:{  "Content-Type": "application/json",
-  "x-api-key": import.meta.env.VITE_ANTHROPIC_KEY,
-  "anthropic-version": "2023-06-01",
-  "anthropic-dangerous-direct-browser-access": "true"
-},
+const res = await fetch("/api/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
         body:JSON.stringify({
           model:"claude-sonnet-4-20250514", max_tokens:1500,
           messages:[{role:"user",content:`Eres un experto en branding. Genera UNA VARIANTE DIFERENTE de identidad de marca para un/a ${cat.label}. IMPORTANTE: debe ser distinta a nombres como ${variants.map(v=>v.brandName).join(", ")}.\n${ctx}\n\nResponde SOLO JSON válido sin markdown:\n{"brandName":"","alternativeNames":["",""],"slogan":"","alternativeSlogans":["",""],"essence":"","personality":["","","",""],"toneOfVoice":"","colors":{"primary":{"hex":"#XXXXXX","name":"","meaning":""},"secondary":{"hex":"#XXXXXX","name":"","meaning":""},"accent":{"hex":"#XXXXXX","name":"","meaning":""},"neutral":{"hex":"#XXXXXX","name":"","meaning":""}},"typography":{"display":{"font":"","use":""},"body":{"font":"","use":""}},"logoDirection":"","brandStory":"","targetMessage":"","differentiation":""}`}]
