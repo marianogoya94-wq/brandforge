@@ -212,8 +212,8 @@ export default function BrandForge() {
   const [loadMsg, setLoadMsg]   = useState("");
   const [isDemo, setIsDemo]     = useState(false);
   const [logoTab, setLogoTab]   = useState("dark");
-  const [logoUrl, setLogoUrl] = useState(null);
-const [loadingLogo, setLoadingLogo] = useState(false);
+  const [logoUrl, setLogoUrl]   = useState(null);
+  const [loadingLogo, setLoadingLogo] = useState(false);
   const [toast, setToast]       = useState("");
   const [copied, setCopied]     = useState(false);
   const [variants, setVariants] = useState([]);
@@ -242,24 +242,27 @@ const [loadingLogo, setLoadingLogo] = useState(false);
       setResult(d); setVariants([d]); setActiveVariant(0); setPhase("result");
     }, 3800);
   };
+
+  // ── GENERATE LOGO ──
   const generateLogo = async (brandResult) => {
-  setLoadingLogo(true);
-  setLogoUrl(null);
-  try {
-    const prompt = `Minimalist professional logo icon for "${brandResult.brandName}". ${brandResult.logoDirection} Colors: ${Object.values(brandResult.colors||{}).map(c=>c.hex).join(", ")}. Clean vector style, white background, no text, just the symbol.`;
-    const res = await fetch("/api/generate-logo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    if (data.url) setLogoUrl(data.url);
-  } catch(err) { console.log("Error generando logo:", err); }
-  finally { setLoadingLogo(false); }
-};
+    setLoadingLogo(true);
+    setLogoUrl(null);
+    try {
+      const prompt = `Minimalist professional logo icon for "${brandResult.brandName}". ${brandResult.logoDirection} Colors: ${Object.values(brandResult.colors||{}).map(c=>c.hex).join(", ")}. Clean vector style, white background, no text, just the symbol.`;
+      const res = await fetch("/api/generate-logo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data.url) setLogoUrl(data.url);
+    } catch(err) { console.log("Error generando logo:", err); }
+    finally { setLoadingLogo(false); }
+  };
+
   // ── REAL ──
   const runReal = async () => {
-    setPhase("loading"); setIsDemo(false);
+    setPhase("loading"); setIsDemo(false); setLogoUrl(null);
     let i=0; setLoadMsg(MSGS[0]);
     const iv = setInterval(()=>{ i=(i+1)%MSGS.length; setLoadMsg(MSGS[i]); }, 1600);
     const ctx = cat.questions.map(q => `- ${q.label}: ${answers[q.id]}`).join("\n");
@@ -289,9 +292,8 @@ const [loadingLogo, setLoadingLogo] = useState(false);
     showToast("Generando nueva variante...");
     const ctx = cat.questions.map(q=>`- ${q.label}: ${answers[q.id]}`).join("\n");
     try {
-const res = await fetch("/api/generate", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
+      const res = await fetch("/api/generate",{
+        method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
           model:"claude-sonnet-4-20250514", max_tokens:1500,
           messages:[{role:"user",content:`Eres un experto en branding. Genera UNA VARIANTE DIFERENTE de identidad de marca para un/a ${cat.label}. IMPORTANTE: debe ser distinta a nombres como ${variants.map(v=>v.brandName).join(", ")}.\n${ctx}\n\nResponde SOLO JSON válido sin markdown:\n{"brandName":"","alternativeNames":["",""],"slogan":"","alternativeSlogans":["",""],"essence":"","personality":["","","",""],"toneOfVoice":"","colors":{"primary":{"hex":"#XXXXXX","name":"","meaning":""},"secondary":{"hex":"#XXXXXX","name":"","meaning":""},"accent":{"hex":"#XXXXXX","name":"","meaning":""},"neutral":{"hex":"#XXXXXX","name":"","meaning":""}},"typography":{"display":{"font":"","use":""},"body":{"font":"","use":""}},"logoDirection":"","brandStory":"","targetMessage":"","differentiation":""}`}]
@@ -301,12 +303,12 @@ const res = await fetch("/api/generate", {
       const parsed = JSON.parse(data.content.map(x=>x.text||"").join("").replace(/```json|```/g,"").trim());
       const newVariants = [...variants, parsed];
       setVariants(newVariants); setActiveVariant(newVariants.length-1); setResult(parsed);
+      generateLogo(parsed);
       showToast(`¡Variante ${newVariants.length} generada! 🎨`);
     } catch { showToast("Error al generar variante."); }
   };
 
-
-const handleShare = async () => {
+  const handleShare = async () => {
     try {
       const url = window.location.href;
       await navigator.clipboard.writeText(url);
@@ -515,24 +517,26 @@ const handleShare = async () => {
               ))}
             </div>
             <div style={{background:logoBg[logoTab],borderRadius:12,padding:"40px 20px",display:"flex",flexDirection:"column",alignItems:"center",gap:16,transition:"background 0.4s",marginBottom:12}}>
-            {logoUrl ? (
-  <img src={logoUrl} alt="Logo generado" style={{width:160,height:160,borderRadius:12,objectFit:"contain"}}/>
-) : loadingLogo ? (
-  <div style={{width:160,height:160,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10}}>
-    <div style={{width:40,height:40,border:`3px solid ${C.border}`,borderTopColor:C.accent,borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
-    <span style={{fontSize:11,color:C.muted}}>Generando logo...</span>
-  </div>
-) : (
-  <LogoSVG result={result} size={160}/>
-)}
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo generado" style={{width:160,height:160,borderRadius:12,objectFit:"contain",background:"white",padding:8}}/>
+              ) : loadingLogo ? (
+                <div style={{width:160,height:160,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10}}>
+                  <div style={{width:40,height:40,border:`3px solid rgba(255,255,255,0.2)`,borderTopColor:"white",borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
+                  <span style={{fontSize:11,color:"rgba(255,255,255,0.6)"}}>Generando logo con IA...</span>
+                </div>
+              ) : (
+                <LogoSVG result={result} size={160}/>
+              )}
               <div style={{textAlign:"center"}}>
                 <div style={{fontSize:22,fontWeight:700,color:logoTab==="light"?result.colors?.primary?.hex:result.colors?.neutral?.hex,letterSpacing:"0.04em",transition:"color 0.3s"}}>{result.brandName}</div>
                 <div style={{fontSize:10,color:logoTab==="light"?result.colors?.secondary?.hex:result.colors?.accent?.hex,letterSpacing:"0.2em",textTransform:"uppercase",marginTop:3,transition:"color 0.3s"}}>{result.slogan}</div>
               </div>
             </div>
-            <div style={{background:"#0a1a08",border:`1px solid ${C.accent}20`,borderRadius:8,padding:"10px 14px",fontSize:12,color:C.muted,lineHeight:1.6}}>
-              ⚡ <strong style={{color:C.accent}}>En tu app real:</strong> DALL-E 3 genera el logo automáticamente. El cliente no hace nada — espera 8 segundos y lo recibe. Costo: $0.04 por logo.
-            </div>
+            {!isDemo && (
+              <div style={{background:"#0a1a08",border:`1px solid ${C.accent}20`,borderRadius:8,padding:"10px 14px",fontSize:12,color:C.muted,lineHeight:1.6,marginBottom:8}}>
+                ⚡ <strong style={{color:C.accent}}>Logo generado por DALL-E 3</strong> — único para cada marca. Costo: $0.04.
+              </div>
+            )}
           </div>
 
           {/* Nombres y slogans */}
