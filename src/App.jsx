@@ -212,6 +212,8 @@ export default function BrandForge() {
   const [loadMsg, setLoadMsg]   = useState("");
   const [isDemo, setIsDemo]     = useState(false);
   const [logoTab, setLogoTab]   = useState("dark");
+  const [logoUrl, setLogoUrl] = useState(null);
+const [loadingLogo, setLoadingLogo] = useState(false);
   const [toast, setToast]       = useState("");
   const [copied, setCopied]     = useState(false);
   const [variants, setVariants] = useState([]);
@@ -258,6 +260,7 @@ export default function BrandForge() {
       const data = await res.json();
       const parsed = JSON.parse(data.content.map(x=>x.text||"").join("").replace(/```json|```/g,"").trim());
       setResult(parsed); setVariants([parsed]); setActiveVariant(0); setPhase("result");
+      generateLogo(parsed);
     } catch {
       showToast("⚠️ Error de API. Probá el modo demo."); setPhase("form");
     } finally { clearInterval(iv); }
@@ -288,7 +291,22 @@ const res = await fetch("/api/generate", {
     } catch { showToast("Error al generar variante."); }
   };
 
-  const handleShare = async () => {
+  const generateLogo = async (brandResult) => {
+  setLoadingLogo(true);
+  setLogoUrl(null);
+  try {
+    const prompt = `Minimalist professional logo icon for "${brandResult.brandName}". ${brandResult.logoDirection} Colors: ${Object.values(brandResult.colors||{}).map(c=>c.hex).join(", ")}. Clean vector style, white background, no text, just the symbol.`;
+    const res = await fetch("/api/generate-logo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    if (data.url) setLogoUrl(data.url);
+  } catch { console.log("Error generando logo"); }
+  finally { setLoadingLogo(false); }
+};
+const handleShare = async () => {
     try {
       const url = window.location.href;
       await navigator.clipboard.writeText(url);
@@ -497,7 +515,16 @@ const res = await fetch("/api/generate", {
               ))}
             </div>
             <div style={{background:logoBg[logoTab],borderRadius:12,padding:"40px 20px",display:"flex",flexDirection:"column",alignItems:"center",gap:16,transition:"background 0.4s",marginBottom:12}}>
-              <LogoSVG result={result} size={160}/>
+            {logoUrl ? (
+  <img src={logoUrl} alt="Logo generado" style={{width:160,height:160,borderRadius:12,objectFit:"contain"}}/>
+) : loadingLogo ? (
+  <div style={{width:160,height:160,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10}}>
+    <div style={{width:40,height:40,border:`3px solid ${C.border}`,borderTopColor:C.accent,borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
+    <span style={{fontSize:11,color:C.muted}}>Generando logo...</span>
+  </div>
+) : (
+  <LogoSVG result={result} size={160}/>
+)}
               <div style={{textAlign:"center"}}>
                 <div style={{fontSize:22,fontWeight:700,color:logoTab==="light"?result.colors?.primary?.hex:result.colors?.neutral?.hex,letterSpacing:"0.04em",transition:"color 0.3s"}}>{result.brandName}</div>
                 <div style={{fontSize:10,color:logoTab==="light"?result.colors?.secondary?.hex:result.colors?.accent?.hex,letterSpacing:"0.2em",textTransform:"uppercase",marginTop:3,transition:"color 0.3s"}}>{result.slogan}</div>
