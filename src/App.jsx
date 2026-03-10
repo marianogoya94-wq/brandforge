@@ -303,7 +303,7 @@ const res = await fetch("/api/generate", {
     });
     const data = await res.json();
     if (data.url) setLogoUrl(data.url);
-  } catch { console.log("Error generando logo"); }
+  } catch(err) { console.log("Error generando logo:", err); }
   finally { setLoadingLogo(false); }
 };
 const handleShare = async () => {
