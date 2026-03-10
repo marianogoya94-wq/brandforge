@@ -242,7 +242,21 @@ const [loadingLogo, setLoadingLogo] = useState(false);
       setResult(d); setVariants([d]); setActiveVariant(0); setPhase("result");
     }, 3800);
   };
-
+  const generateLogo = async (brandResult) => {
+  setLoadingLogo(true);
+  setLogoUrl(null);
+  try {
+    const prompt = `Minimalist professional logo icon for "${brandResult.brandName}". ${brandResult.logoDirection} Colors: ${Object.values(brandResult.colors||{}).map(c=>c.hex).join(", ")}. Clean vector style, white background, no text, just the symbol.`;
+    const res = await fetch("/api/generate-logo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    if (data.url) setLogoUrl(data.url);
+  } catch(err) { console.log("Error generando logo:", err); }
+  finally { setLoadingLogo(false); }
+};
   // ── REAL ──
   const runReal = async () => {
     setPhase("loading"); setIsDemo(false);
@@ -291,21 +305,7 @@ const res = await fetch("/api/generate", {
     } catch { showToast("Error al generar variante."); }
   };
 
-  const generateLogo = async (brandResult) => {
-  setLoadingLogo(true);
-  setLogoUrl(null);
-  try {
-    const prompt = `Minimalist professional logo icon for "${brandResult.brandName}". ${brandResult.logoDirection} Colors: ${Object.values(brandResult.colors||{}).map(c=>c.hex).join(", ")}. Clean vector style, white background, no text, just the symbol.`;
-    const res = await fetch("/api/generate-logo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    if (data.url) setLogoUrl(data.url);
-  } catch(err) { console.log("Error generando logo:", err); }
-  finally { setLoadingLogo(false); }
-};
+
 const handleShare = async () => {
     try {
       const url = window.location.href;
