@@ -249,7 +249,8 @@ export default function BrandForge() {
     setLoadingLogo(true);
     setLogoUrl(null);
     try {
-      const prompt = `Professional logo icon for "${brandResult.brandName}", a ${cat?.label || "brand"}. Style: ${brandResult.logoDirection}. Brand personality: ${brandResult.personality?.join(", ")}. Color palette: ${Object.values(brandResult.colors||{}).map(c=>c.hex).join(", ")}. Make it bold, memorable and unique. Vector style, white background, no text inside the logo.`;
+      const logoPrompts = { artist: `Artistic logo icon for "${brandResult.brandName}". ${brandResult.logoDirection}. Personality: ${brandResult.personality?.join(", ")}. Colors: ${Object.values(brandResult.colors||{}).slice(0,2).map(c=>c.hex).join(" and ")}. Style: creative, expressive, bold. Flat vector, white background, no text.`, business: `Corporate logo icon for "${brandResult.brandName}". ${brandResult.logoDirection}. Values: ${brandResult.personality?.join(", ")}. Colors: ${Object.values(brandResult.colors||{}).slice(0,2).map(c=>c.hex).join(" and ")}. Style: modern, professional, geometric. Flat vector, white background, no text.`, commerce: `Shop logo icon for "${brandResult.brandName}". ${brandResult.logoDirection}. Brand feel: ${brandResult.personality?.join(", ")}. Colors: ${Object.values(brandResult.colors||{}).slice(0,2).map(c=>c.hex).join(" and ")}. Style: friendly, memorable. Flat vector, white background, no text.`, creator: `Personal brand logo for "${brandResult.brandName}". ${brandResult.logoDirection}. Personality: ${brandResult.personality?.join(", ")}. Colors: ${Object.values(brandResult.colors||{}).slice(0,2).map(c=>c.hex).join(" and ")}. Style: bold, digital-native. Flat vector, white background, no text.` };
+const prompt = logoPrompts[cat?.id] || logoPrompts.business;
       const res = await fetch("/api/generate-logo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
