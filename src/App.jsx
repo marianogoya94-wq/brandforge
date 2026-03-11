@@ -214,6 +214,7 @@ export default function BrandForge() {
   const [logoTab, setLogoTab]   = useState("dark");
   const [logoUrl, setLogoUrl]   = useState(null);
   const [loadingLogo, setLoadingLogo] = useState(false);
+  const [showBrandName, setShowBrandName] = useState(false);
   const [toast, setToast]       = useState("");
   const [copied, setCopied]     = useState(false);
   const [variants, setVariants] = useState([]);
@@ -517,16 +518,30 @@ export default function BrandForge() {
               ))}
             </div>
             <div style={{background:logoBg[logoTab],borderRadius:12,padding:"40px 20px",display:"flex",flexDirection:"column",alignItems:"center",gap:16,transition:"background 0.4s",marginBottom:12}}>
-              {logoUrl ? (
-                <img src={logoUrl} alt="Logo generado" style={{width:160,height:160,borderRadius:12,objectFit:"contain",background:"white",padding:8}}/>
-              ) : loadingLogo ? (
-                <div style={{width:160,height:160,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10}}>
-                  <div style={{width:40,height:40,border:`3px solid rgba(255,255,255,0.2)`,borderTopColor:"white",borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
-                  <span style={{fontSize:11,color:"rgba(255,255,255,0.6)"}}>Generando logo con IA...</span>
-                </div>
-              ) : (
-                <LogoSVG result={result} size={160}/>
-              )}
+{logoUrl ? (
+  <div style={{textAlign:"center"}}>
+    <img src={logoUrl} alt="Logo generado" style={{width:160,height:160,borderRadius:12,objectFit:"contain",background:"white",padding:8,display:"block",margin:"0 auto"}}/>
+    {showBrandName && (
+      <div style={{marginTop:10}}>
+        <div style={{fontSize:20,fontWeight:700,color:"white",letterSpacing:"0.06em"}}>{result.brandName}</div>
+        <div style={{fontSize:10,color:result.colors?.accent?.hex,letterSpacing:"0.2em",textTransform:"uppercase",marginTop:2}}>{result.slogan}</div>
+      </div>
+    )}
+    <div style={{marginTop:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+      <span style={{fontSize:12,color:C.muted}}>¿Querés agregar el nombre al logo?</span>
+      <button onClick={()=>setShowBrandName(p=>!p)} style={{background:showBrandName?C.accent:"transparent",border:`1px solid ${showBrandName?C.accent:C.border}`,borderRadius:20,padding:"4px 14px",fontSize:12,fontWeight:700,color:showBrandName?"#0a0a0f":C.muted,cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>
+        {showBrandName?"✓ Sí":"No"}
+      </button>
+    </div>
+  </div>
+) : loadingLogo ? (
+  <div style={{width:160,height:160,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10}}>
+    <div style={{width:40,height:40,border:`3px solid rgba(255,255,255,0.2)`,borderTopColor:"white",borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
+    <span style={{fontSize:11,color:"rgba(255,255,255,0.6)"}}>Generando logo con IA...</span>
+  </div>
+) : (
+  <LogoSVG result={result} size={160}/>
+)}
               <div style={{textAlign:"center"}}>
                 <div style={{fontSize:22,fontWeight:700,color:logoTab==="light"?result.colors?.primary?.hex:result.colors?.neutral?.hex,letterSpacing:"0.04em",transition:"color 0.3s"}}>{result.brandName}</div>
                 <div style={{fontSize:10,color:logoTab==="light"?result.colors?.secondary?.hex:result.colors?.accent?.hex,letterSpacing:"0.2em",textTransform:"uppercase",marginTop:3,transition:"color 0.3s"}}>{result.slogan}</div>
