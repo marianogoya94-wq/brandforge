@@ -548,7 +548,13 @@ const prompt = logoPrompts[cat?.id] || logoPrompts.business;
                 <div style={{fontSize:10,color:logoTab==="light"?result.colors?.secondary?.hex:result.colors?.accent?.hex,letterSpacing:"0.2em",textTransform:"uppercase",marginTop:3,transition:"color 0.3s"}}>{result.slogan}</div>
               </div>
             </div>
-            {!isDemo && (
+            {logoUrl && (
+  <a href={logoUrl} download="logo.png" target="_blank" rel="noreferrer"
+    style={{display:"inline-flex",alignItems:"center",gap:6,background:"#1a1a08",border:`1px solid ${C.accent}40`,borderRadius:8,padding:"8px 16px",fontSize:12,fontWeight:700,color:C.accent,textDecoration:"none",marginBottom:8}}>
+    ⬇ Descargar logo
+  </a>
+)}
+{!isDemo && (
               <div style={{background:"#0a1a08",border:`1px solid ${C.accent}20`,borderRadius:8,padding:"10px 14px",fontSize:12,color:C.muted,lineHeight:1.6,marginBottom:8}}>
                 ⚡ <strong style={{color:C.accent}}>Logo generado por DALL-E 3</strong> — único para cada marca. Costo: $0.04.
               </div>
@@ -572,7 +578,10 @@ const prompt = logoPrompts[cat?.id] || logoPrompts.business;
                   <div className="swatch" style={{background:c.hex,boxShadow:`0 3px 12px ${c.hex}55`}}/>
                   <div>
                     <div style={{fontWeight:600,fontSize:13}}>{c.name}</div>
-                    <div style={{fontSize:11,color:C.muted,fontFamily:"monospace"}}>{c.hex}</div>
+                    <div onClick={()=>{navigator.clipboard.writeText(c.hex); showToast(`¡Copiado ${c.hex}!`);}}
+  style={{fontSize:11,color:C.muted,fontFamily:"monospace",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+  {c.hex} <span style={{fontSize:9,opacity:0.5}}>📋</span>
+</div>
                     <div style={{fontSize:11,color:C.muted,marginTop:1}}>{c.meaning}</div>
                   </div>
                 </div>
