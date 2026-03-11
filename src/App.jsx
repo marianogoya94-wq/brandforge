@@ -249,7 +249,7 @@ export default function BrandForge() {
     setLoadingLogo(true);
     setLogoUrl(null);
     try {
-      const prompt = `Minimalist professional logo icon for "${brandResult.brandName}". ${brandResult.logoDirection} Colors: ${Object.values(brandResult.colors||{}).map(c=>c.hex).join(", ")}. Clean vector style, white background, no text, just the symbol.`;
+      const prompt = `Professional logo icon for "${brandResult.brandName}", a ${cat?.label || "brand"}. Style: ${brandResult.logoDirection}. Brand personality: ${brandResult.personality?.join(", ")}. Color palette: ${Object.values(brandResult.colors||{}).map(c=>c.hex).join(", ")}. Make it bold, memorable and unique. Vector style, white background, no text inside the logo.`;
       const res = await fetch("/api/generate-logo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
