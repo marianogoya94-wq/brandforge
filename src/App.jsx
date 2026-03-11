@@ -400,7 +400,7 @@ export default function BrandForge() {
             ))}
           </div>
 
-          <p style={{textAlign:"center",color:C.muted,fontSize:11,marginTop:24}}>Powered by Claude AI · Identidades únicas y profesionales · ~20 segundos</p>
+          <p style={{textAlign:"center",color:C.muted,fontSize:11,marginTop:24}}>Powered by Brandforge AI · Identidades únicas y profesionales · ~20 segundos</p>
         </div>
       )}
 
